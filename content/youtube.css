@@ -1,0 +1,69 @@
+/* ── StrixBlock YouTube Cosmetic Filters ── */
+
+/* Protect core YouTube chrome — IDs give (1,x,x) specificity, beats all attribute rules */
+ytd-masthead#masthead,
+ytd-masthead { display: flex !important; visibility: visible !important; }
+#masthead-container { display: block !important; visibility: visible !important; }
+/* Protect the inner flex container (div#container.style-scope.ytd-masthead) */
+div[class~="ytd-masthead"]#container { display: flex !important; visibility: visible !important; }
+
+/* In-page ad containers */
+ytd-display-ad-renderer,
+ytd-promoted-sparkles-web-renderer,
+ytd-promoted-video-renderer,
+ytd-search-pyv-renderer,
+ytd-in-feed-ad-layout-renderer,
+ytd-ad-slot-renderer,
+ytd-action-companion-ad-renderer,
+ytd-banner-promo-renderer,
+ytd-statement-banner-renderer,
+ytd-video-masthead-ad-v3-renderer,
+ytd-video-masthead-ad-primetime-renderer,
+ytd-compact-promoted-video-renderer,
+ytd-shelf-renderer[is-shelf-list],
+
+/* Rich section wrappers that contain ad slots */
+ytd-rich-section-renderer:has(ytd-ad-slot-renderer),
+ytd-rich-section-renderer:has(ytd-statement-banner-renderer),
+
+/* Player ads */
+#player-ads,
+#masthead-ad,
+.masthead-ad,
+
+/* Video player ad overlays */
+.ytp-ad-overlay-container,
+.ytp-ad-text-overlay,
+.ytp-ad-image-overlay,
+.ytp-ad-player-overlay,
+.ytp-ad-player-overlay-layout,
+.ytp-ad-player-overlay-instream-info,
+.ytp-ad-overlay-slot,
+.ytp-ad-module,
+.ytp-ad-persistent-progress-bar-container,
+.ytp-ad-timed-pie-countdown-renderer,
+.ytp-ad-simple-ad-badge,
+.ytp-ad-badge,
+
+/* YouTube Premium / subscription upsells */
+ytd-mealbar-promo-renderer,
+tp-yt-paper-dialog:has([class*="Promo"]),
+
+/* Home page banner ads */
+ytd-primetime-promo-renderer,
+ytd-hero-promo-renderer,
+
+/* Class based ad wrappers */
+.ytd-display-ad-renderer,
+.ytd-ad-slot-renderer,
+[data-is-ad="true"] { display: none !important; }
+
+/* Hide countdown but let JS click the button */
+.ytp-ad-skip-ad-slot { visibility: hidden; }
+.ytp-ad-preview-text, .ytp-ad-preview-container { display: none !important; }
+
+/* YouTube's anti-adblock enforcement modal */
+ytd-enforcement-message-view-model,
+tp-yt-iron-overlay-backdrop,
+#error-screen:has([class*="adblock"]),
+ytd-popup-container:has(ytd-enforcement-message-view-model) { display: none !important; }

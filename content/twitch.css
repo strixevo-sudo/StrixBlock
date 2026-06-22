@@ -1,0 +1,46 @@
+/* ── StrixBlock Twitch Cosmetic Filters ── */
+
+/* Sidebar/in-page banner ads */
+.tw-ad-unit,
+.tw-ad-banner-display,
+[data-test-selector="ad-banner-default-wrapper"],
+[class*="BannerAd"],
+[class*="AdBanner"],
+[class*="ad-banner"],
+[class*="AdContainer"],
+
+/* Get Turbo and subscription upsell prompts */
+.channel-root__right-col [data-test-selector="upsell-experiment-ad"],
+[data-target="animated-emote-upsell-ad"],
+[data-a-target="turbo-upsell"],
+[class*="TurboUpsell"],
+
+/* Home page promoted streams */
+article[data-a-target*="ad"],
+[data-a-target="card-2"] [class*="tw-ad"],
+[class*="HomeShelfAd"],
+[class*="PromotedShelf"],
+
+/* Sponsored shelf items at bottom of channel list */
+[data-test-selector="shelf-default-wrapper"] [class*="ad-"],
+[class*="SponsoredBadge"],
+[data-a-target*="sponsored"],
+
+/* Bits ad prompts / follow banners that are ads */
+[class*="BitsUpsell"],
+[class*="SubscribeCTA"]:not([class*="subscribe-button"]),
+
+/* Primetime promo banners */
+[class*="PrimetimeBanner"],
+[class*="HypeTrainAd"],
+
+/* Survey / feedback boxes that appear as ads */
+[class*="FeedbackSurvey"],
+[data-a-target="survey-panel"],
+
+/* In-player ad overlay (covered by JS, but hide as fallback) */
+.video-player__overlay [class*="AdBanner"],
+[class*="VideoAdLabel"],
+[class*="AdText"],
+[data-a-target="ad-text"],
+[data-a-target="video-ad-countdown"] { display: none !important; }

@@ -1,0 +1,68 @@
+{
+  "manifest_version": 3,
+  "name": "StrixBlock",
+  "version": "1.3.0",
+  "description": "Auto-skips YouTube ads, blocks ad networks and trackers sitewide.",
+  "permissions": [
+    "declarativeNetRequest",
+    "storage",
+    "alarms"
+  ],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.youtube.com/*"],
+      "js": ["content/youtube.js"],
+      "css": ["content/youtube.css"],
+      "run_at": "document_start",
+      "all_frames": false
+    },
+    {
+      "matches": ["*://*.twitch.tv/*"],
+      "js": ["content/twitch.js"],
+      "css": ["content/twitch.css"],
+      "run_at": "document_idle",
+      "all_frames": false
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/youtube_spoof.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "css": ["content/cosmetic.css", "content/anti_adblock.css"],
+      "js": ["content/anti_adblock.js"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/sweep.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "ads",
+        "enabled": true,
+        "path": "rules/block_rules.json"
+      }
+    ]
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "StrixBlock"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["stubs/empty.js", "stubs/empty.gif"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
