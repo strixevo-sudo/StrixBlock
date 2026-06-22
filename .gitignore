@@ -1,2 +1,5 @@
 _metadata/
 *.rar
+node_modules/
+dist/
+*.js.map

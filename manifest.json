@@ -1,68 +1,74 @@
 {
   "manifest_version": 3,
   "name": "StrixBlock",
-  "version": "1.4.0",
-  "description": "Auto-skips YouTube ads, blocks ad networks and trackers sitewide.",
+  "version": "2.0.0",
+  "description": "Professional ad blocker and privacy shield",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "dist/background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "dist/popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_ui": {
+    "page": "dist/dashboard/dashboard.html",
+    "open_in_tab": true
+  },
   "permissions": [
     "declarativeNetRequest",
+    "declarativeNetRequestFeedback",
     "storage",
-    "alarms"
+    "alarms",
+    "tabs",
+    "scripting"
   ],
-  "host_permissions": ["<all_urls>"],
-  "background": {
-    "service_worker": "background.js"
-  },
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "content_scripts": [
     {
-      "matches": ["*://*.youtube.com/*"],
-      "js": ["content/youtube.js"],
-      "css": ["content/youtube.css"],
+      "matches": ["<all_urls>"],
+      "js": ["dist/content/main.js"],
+      "css": ["dist/content/cosmetic.css"],
       "run_at": "document_start",
-      "all_frames": false
-    },
-    {
-      "matches": ["*://*.twitch.tv/*"],
-      "js": ["content/twitch.js"],
-      "css": ["content/twitch.css"],
-      "run_at": "document_idle",
       "all_frames": false
     },
     {
       "matches": ["<all_urls>"],
-      "js": ["content/youtube_spoof.js"],
+      "js": ["dist/content/spoof.js"],
       "run_at": "document_start",
+      "all_frames": true,
       "world": "MAIN"
-    },
-    {
-      "matches": ["<all_urls>"],
-      "css": ["content/cosmetic.css", "content/anti_adblock.css"],
-      "js": ["content/anti_adblock.js"],
-      "run_at": "document_start"
-    },
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content/sweep.js"],
-      "run_at": "document_idle",
-      "all_frames": false
     }
   ],
   "declarative_net_request": {
     "rule_resources": [
       {
-        "id": "ads",
+        "id": "default_rules",
         "enabled": true,
-        "path": "rules/block_rules.json"
+        "path": "rules/default-rules.json"
       }
     ]
-  },
-  "action": {
-    "default_popup": "popup.html",
-    "default_title": "StrixBlock"
   },
   "web_accessible_resources": [
     {
       "resources": ["stubs/empty.js", "stubs/empty.gif"],
       "matches": ["<all_urls>"]
     }
-  ]
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'"
+  }
 }

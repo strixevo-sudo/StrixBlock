@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StrixBlock Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --bg2: #161b22;
+      --bg3: #21262d;
+      --bg4: #30363d;
+      --accent: #e94560;
+      --accent-hover: #ff6b8a;
+      --purple: #9147ff;
+      --purple-hover: #a970ff;
+      --text: #e6edf3;
+      --text2: #8b949e;
+      --text3: #656d76;
+      --success: #3fb950;
+      --warning: #d29922;
+      --danger: #f85149;
+      --border: #30363d;
+      --radius: 8px;
+      --radius-lg: 12px;
+      --sidebar-w: 220px;
+      --transition: 0.15s ease;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ─── Sidebar ────────────────────────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      position: sticky;
+      top: 0;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 20px 16px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-icon {
+      font-size: 24px;
+      color: var(--accent);
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .logo-text {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .logo-version {
+      font-size: 11px;
+      color: var(--text2);
+      margin-top: 2px;
+    }
+
+    .sidebar-nav {
+      padding: 8px;
+      flex: 1;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      color: var(--text2);
+      font-size: 13px;
+      font-weight: 500;
+      transition: background var(--transition), color var(--transition);
+      user-select: none;
+      margin-bottom: 2px;
+    }
+
+    .nav-item:hover {
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      background: rgba(233,69,96,0.15);
+      color: var(--accent);
+    }
+
+    .nav-icon {
+      width: 16px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    /* ─── Main content ───────────────────────────────────────────────── */
+    .main {
+      flex: 1;
+      padding: 24px 28px;
+      overflow-y: auto;
+      max-width: 900px;
+    }
+
+    .page {
+      display: none;
+    }
+    .page.active {
+      display: block;
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+
+    /* ─── Cards ──────────────────────────────────────────────────────── */
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    /* ─── Stats grid ─────────────────────────────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+
+    /* ─── Toggle rows ────────────────────────────────────────────────── */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toggle-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .toggle-row-info {
+      flex: 1;
+    }
+
+    .toggle-row-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .toggle-row-desc {
+      font-size: 11px;
+      color: var(--text2);
+      margin-top: 2px;
+    }
+
+    /* Toggle switch */
+    .toggle {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      flex-shrink: 0;
+      cursor: pointer;
+      margin-left: 12px;
+    }
+
+    .toggle input { opacity: 0; width: 0; height: 0; }
+
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--bg4);
+      border-radius: 22px;
+      transition: background var(--transition);
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      left: 3px;
+      top: 3px;
+      background: var(--text2);
+      border-radius: 50%;
+      transition: transform var(--transition), background var(--transition);
+    }
+
+    .toggle input:checked + .toggle-slider {
+      background: var(--success);
+    }
+
+    .toggle input:checked + .toggle-slider::before {
+      background: white;
+      transform: translateX(18px);
+    }
+
+    /* ─── Filter list items ──────────────────────────────────────────── */
+    .filter-list-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .filter-list-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .filter-list-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .filter-list-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .filter-list-meta {
+      font-size: 11px;
+      color: var(--text2);
+      margin-top: 2px;
+    }
+
+    .filter-list-meta span {
+      margin-right: 8px;
+    }
+
+    .filter-list-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ─── Buttons ────────────────────────────────────────────────────── */
+    .btn {
+      padding: 7px 14px;
+      border-radius: var(--radius);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background var(--transition), border-color var(--transition), color var(--transition);
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text2);
+      border-color: var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      border-color: var(--text3);
+    }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--danger);
+      border-color: var(--danger);
+    }
+
+    .btn-danger:hover {
+      background: rgba(248, 81, 73, 0.1);
+    }
+
+    .btn-sm {
+      padding: 4px 10px;
+      font-size: 11px;
+    }
+
+    /* ─── Textarea ───────────────────────────────────────────────────── */
+    textarea {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: 'Cascadia Code', 'Consolas', 'Monaco', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      padding: 12px;
+      resize: vertical;
+      min-height: 200px;
+      outline: none;
+      transition: border-color var(--transition);
+    }
+
+    textarea:focus {
+      border-color: var(--accent);
+    }
+
+    /* ─── Input ──────────────────────────────────────────────────────── */
+    .input-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 13px;
+      padding: 7px 12px;
+      outline: none;
+      transition: border-color var(--transition);
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+
+    /* ─── Whitelist list ─────────────────────────────────────────────── */
+    .whitelist-entry {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .whitelist-entry:last-child {
+      border-bottom: none;
+    }
+
+    .whitelist-domain {
+      flex: 1;
+      font-size: 13px;
+    }
+
+    /* ─── Domain table ───────────────────────────────────────────────── */
+    .domain-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .domain-table th {
+      text-align: left;
+      padding: 6px 8px;
+      color: var(--text2);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .domain-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-family: 'Cascadia Code', monospace;
+    }
+
+    .domain-table td:last-child {
+      color: var(--accent);
+      text-align: right;
+      font-family: inherit;
+      font-weight: 700;
+    }
+
+    /* ─── Settings select ────────────────────────────────────────────── */
+    select {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 12px;
+      padding: 5px 10px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* ─── About page ─────────────────────────────────────────────────── */
+    .about-info {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .about-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .about-row .label {
+      color: var(--text2);
+      width: 140px;
+      flex-shrink: 0;
+    }
+
+    .about-row .value {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ─── Toast ──────────────────────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 16px;
+      font-size: 13px;
+      color: var(--text);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    .toast.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── Badge ──────────────────────────────────────────────────────── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge-ads { background: rgba(233,69,96,0.2); color: var(--accent); }
+    .badge-privacy { background: rgba(145,71,255,0.2); color: var(--purple); }
+    .badge-malware { background: rgba(248,81,73,0.2); color: var(--danger); }
+    .badge-annoyances { background: rgba(210,153,34,0.2); color: var(--warning); }
+    .badge-custom { background: rgba(63,185,80,0.2); color: var(--success); }
+
+    /* ─── Separator ──────────────────────────────────────────────────── */
+    .section-sep {
+      height: 1px;
+      background: var(--border);
+      margin: 20px 0;
+    }
+
+    .empty-state {
+      color: var(--text3);
+      font-size: 13px;
+      text-align: center;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="logo-icon">■</div>
+        <div>
+          <div class="logo-text">StrixBlock</div>
+          <div class="logo-version" id="logoVersion">v2.0.0</div>
+        </div>
+      </div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-item active" data-page="overview">
+        <span class="nav-icon">◈</span> Overview
+      </div>
+      <div class="nav-item" data-page="filters">
+        <span class="nav-icon">⊟</span> Filter Lists
+      </div>
+      <div class="nav-item" data-page="rules">
+        <span class="nav-icon">≡</span> Custom Rules
+      </div>
+      <div class="nav-item" data-page="whitelist">
+        <span class="nav-icon">○</span> Whitelist
+      </div>
+      <div class="nav-item" data-page="settings">
+        <span class="nav-icon">⚙</span> Settings
+      </div>
+      <div class="nav-item" data-page="about">
+        <span class="nav-icon">ℹ</span> About
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Overview -->
+    <section class="page active" id="page-overview">
+      <h1 class="page-title">Overview</h1>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="statTotal">0</div>
+          <div class="stat-label">Total Blocked</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="statSession">0</div>
+          <div class="stat-label">This Session</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="statAds">0</div>
+          <div class="stat-label">Ads</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="statTrackers">0</div>
+          <div class="stat-label">Trackers</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Top Blocked Domains</div>
+        <div id="topDomainsContainer">
+          <div class="empty-state">No data yet</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="btn btn-secondary btn-sm" id="clearStatsBtn">Clear Statistics</button>
+        <button class="btn btn-secondary btn-sm" id="exportBtn">Export Settings</button>
+        <label class="btn btn-secondary btn-sm" style="cursor:pointer">
+          Import Settings
+          <input type="file" id="importFile" accept=".json" style="display:none">
+        </label>
+      </div>
+    </section>
+
+    <!-- Filter Lists -->
+    <section class="page" id="page-filters">
+      <h1 class="page-title">Filter Lists</h1>
+      <div class="card">
+        <div class="card-title">Subscriptions</div>
+        <div id="filterListsContainer">
+          <div class="empty-state">Loading…</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Custom Rules -->
+    <section class="page" id="page-rules">
+      <h1 class="page-title">Custom Rules</h1>
+      <div class="card">
+        <div class="card-title">EasyList Format Rules</div>
+        <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">
+          Enter custom rules in EasyList/uBlock Origin format. One rule per line.
+          Example: <code>||ads.example.com^</code> or <code>example.com##.ad-banner</code>
+        </p>
+        <textarea id="customRulesTextarea" placeholder="! Custom rules&#10;||ads.example.com^&#10;example.com##.advert"></textarea>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button class="btn btn-primary" id="saveRulesBtn">Save &amp; Apply</button>
+          <button class="btn btn-secondary" id="clearRulesBtn">Clear</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Whitelist -->
+    <section class="page" id="page-whitelist">
+      <h1 class="page-title">Whitelist</h1>
+      <div class="card">
+        <div class="card-title">Whitelisted Sites</div>
+        <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">
+          Sites on this list will not have ads blocked or scripts modified.
+        </p>
+        <div id="whitelistContainer">
+          <div class="empty-state">No sites whitelisted</div>
+        </div>
+        <div class="input-row">
+          <input type="text" id="whitelistInput" placeholder="example.com">
+          <button class="btn btn-primary" id="addWhitelistBtn">Add</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Settings -->
+    <section class="page" id="page-settings">
+      <h1 class="page-title">Settings</h1>
+
+      <div class="card">
+        <div class="card-title">Features</div>
+        <div id="featuresContainer"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Privacy</div>
+        <div id="privacyContainer"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Interface</div>
+        <div id="uiContainer"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Updates</div>
+        <div id="updatesContainer"></div>
+      </div>
+
+      <button class="btn btn-danger btn-sm" id="resetSettingsBtn" style="margin-top:8px">
+        Reset All Settings
+      </button>
+    </section>
+
+    <!-- About -->
+    <section class="page" id="page-about">
+      <h1 class="page-title">About</h1>
+      <div class="card">
+        <div class="about-info">
+          <div class="about-row">
+            <span class="label">Extension</span>
+            <span class="value">StrixBlock</span>
+          </div>
+          <div class="about-row">
+            <span class="label">Version</span>
+            <span class="value" id="aboutVersion">2.0.0</span>
+          </div>
+          <div class="about-row">
+            <span class="label">Manifest</span>
+            <span class="value">Chrome MV3</span>
+          </div>
+          <div class="about-row">
+            <span class="label">GitHub</span>
+            <span class="value">
+              <a href="https://github.com/strixevo-sudo/StrixBlock" target="_blank" rel="noopener">
+                strixevo-sudo/StrixBlock
+              </a>
+            </span>
+          </div>
+        </div>
+
+        <div class="section-sep"></div>
+
+        <div id="updateStatus" style="font-size:13px;color:var(--text2);margin-bottom:12px;">
+          Checking for updates…
+        </div>
+        <button class="btn btn-secondary" id="checkUpdateBtn">Check for Updates</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast"></div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

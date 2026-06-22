@@ -1,0 +1,243 @@
+/* StrixBlock v2 — Static base cosmetic CSS */
+/* Injected at document_start before page content loads */
+
+/* ─── PROTECTED CORE ELEMENTS (must display correctly) ───────────────────── */
+
+ytd-masthead,
+#masthead,
+#masthead-container {
+  display: flex !important;
+}
+
+ytd-app,
+ytd-page-manager,
+#page-manager {
+  display: block !important;
+}
+
+/* ─── YouTube Ad Elements ────────────────────────────────────────────────── */
+
+ytd-display-ad-renderer,
+ytd-display-ad-renderer *,
+ytd-promoted-sparkles-web-renderer,
+ytd-promoted-sparkles-text-search-renderer,
+ytd-promoted-video-renderer,
+ytd-ad-slot-renderer,
+ytd-in-feed-ad-layout-renderer,
+ytd-banner-promo-renderer,
+ytd-statement-banner-renderer,
+ytd-compact-promoted-item-renderer,
+ytd-action-companion-ad-renderer,
+ytd-companion-slot-renderer,
+ytd-player-legacy-desktop-watch-ads-renderer,
+ytd-search-pyv-renderer,
+ytd-video-masthead-ad-v3-renderer,
+ytd-video-masthead-ad-advertiser-info-renderer,
+ytd-rich-item-renderer:has(ytd-ad-slot-renderer),
+ytd-ad-break-service-renderer,
+ytd-mosaic-ad-slot-renderer,
+ytd-reel-shelf-renderer:has([class*="ad"]) {
+  display: none !important;
+}
+
+#player-ads,
+#masthead-ad,
+.ytd-banner-promo-renderer,
+#offer-module {
+  display: none !important;
+}
+
+/* YouTube player ad overlays */
+.ytp-ad-overlay-container,
+.ytp-ad-player-overlay,
+.ytp-ad-player-overlay-instream-info,
+.ytp-ad-badge,
+.ytp-ad-text,
+.ytp-ad-preview-container,
+.ytp-ad-feedback-dialog-container,
+.ytp-ad-module,
+.ytp-ad-image-overlay,
+.ytp-featured-product,
+.ytp-cards-teaser,
+.ytp-suggested-action {
+  display: none !important;
+}
+
+/* YouTube channel page ad shelf */
+#channel-header-container ~ ytd-rich-shelf-renderer[is-banner-available] {
+  display: none !important;
+}
+
+/* YouTube Shorts ads */
+ytd-reel-player-overlay-renderer:has([class*="ad"]) {
+  display: none !important;
+}
+
+/* ─── YouTube Enforcement Dialog — ONLY hide backdrop when dialog is present ─ */
+
+ytd-popup-container:has(ytd-enforcement-message-view-model) tp-yt-iron-overlay-backdrop {
+  display: none !important;
+}
+
+/* ─── Google / AdSense Ads ───────────────────────────────────────────────── */
+
+iframe[src*="googleads"],
+iframe[src*="googlesyndication"],
+iframe[src*="doubleclick.net"],
+iframe[src*="google_ads_iframe"],
+ins.adsbygoogle,
+ins[data-ad-client],
+.adsbygoogle,
+div[id^="google_ads_"],
+div[id*="google_ads_"],
+div[class*="google-ads"],
+div[class*="google_ads"],
+[data-ad-client],
+[data-ad-slot] {
+  display: none !important;
+}
+
+/* ─── Taboola ─────────────────────────────────────────────────────────────── */
+
+div[id^="taboola"],
+div[class*="taboola"],
+.trc_related_container,
+#taboola-below-article-thumbnails,
+#taboola-right-rail-thumbnails,
+[data-tb-region] {
+  display: none !important;
+}
+
+/* ─── Outbrain ────────────────────────────────────────────────────────────── */
+
+div[id^="outbrain"],
+div[class*="outbrain"],
+.OUTBRAIN,
+[data-widget-id*="AR_"],
+.ob-widget {
+  display: none !important;
+}
+
+/* ─── Generic GPT / DFP Ad slots ─────────────────────────────────────────── */
+
+div[id^="div-gpt-ad"],
+div[id^="gpt-ad"],
+div[id^="dfp-ad"],
+div[class*="gpt-ad"],
+div[class*="dfp-ad"],
+.ad-container,
+.ad-wrapper,
+.ad-unit,
+[class*="ad-slot"]:not(ytd-app *:not([class*="ad-slot-renderer"])),
+[class*="adSlot"],
+[id*="div-gpt"],
+iframe[id^="google_ads_iframe"] {
+  display: none !important;
+}
+
+/* ─── IAB Standard Size Iframes (common ad dimensions) ───────────────────── */
+
+iframe[width="300"][height="250"],
+iframe[width="728"][height="90"],
+iframe[width="160"][height="600"],
+iframe[width="300"][height="600"],
+iframe[width="970"][height="250"],
+iframe[width="320"][height="50"],
+iframe[width="320"][height="100"],
+iframe[width="250"][height="250"],
+iframe[width="468"][height="60"],
+iframe[width="336"][height="280"] {
+  display: none !important;
+}
+
+/* ─── Social Media Promoted / Sponsored Posts ────────────────────────────── */
+
+/* Reddit promoted posts */
+[data-testid="post-container"][data-promoted="true"],
+shreddit-ad-post,
+.promotedlink,
+div[data-before-content="advertisement"] {
+  display: none !important;
+}
+
+/* Twitter / X promoted tweets */
+[data-testid="placementTracking"],
+article:has([data-testid="placementTracking"]) {
+  display: none !important;
+}
+
+/* LinkedIn sponsored content */
+.ad-banner-container--desktop,
+.ad-banner-container,
+li.occludable-update:has(.ad-banner-container),
+.feed-ad-container {
+  display: none !important;
+}
+
+/* Facebook sponsored content */
+[data-pagelet*="ads"],
+div[aria-label*="Sponsored"] {
+  display: none !important;
+}
+
+/* ─── Cookie Consent Banners ─────────────────────────────────────────────── */
+
+#onetrust-banner-sdk,
+#onetrust-consent-sdk,
+.onetrust-pc-dark-filter,
+#onetrust-accept-btn-handler,
+.cookie-banner,
+.cookie-notice,
+.cookie-consent,
+.cookie-consent-banner,
+.cookie-law-info-bar,
+.cli-bar-container,
+.cookieconsent,
+[class*="cookie-bar"],
+[class*="cookiebar"],
+[class*="cookie-banner"],
+[class*="cookieBanner"],
+[id*="cookie-banner"],
+[id*="cookieBanner"],
+[id*="cookie-consent"],
+[id*="cookieConsent"],
+.fc-consent-root,
+.fc-dialog-overlay,
+.gdpr-banner,
+.gdpr-consent,
+[class*="gdpr"],
+#gdpr-cookie-notice,
+#cookie-law-info-bar,
+.pum-overlay,
+.pum-container,
+/* Klaro */
+.klaro,
+/* Quantcast */
+#qc-cmp2-ui,
+/* Cookiebot */
+#CybotCookiebotDialog,
+#CybotCookiebotDialogBodyUnderlay,
+/* TrustArc */
+#truste-consent-track,
+.truste_overlay,
+.truste_box_overlay {
+  display: none !important;
+}
+
+/* ─── Popup / Overlay Annoyances ─────────────────────────────────────────── */
+
+.newsletter-popup,
+.newsletter-modal,
+[class*="newsletter-modal"],
+[id*="newsletter-modal"],
+.subscribe-popup,
+.subscribe-modal,
+[class*="paywall-overlay"],
+[class*="paywallOverlay"],
+.modal-backdrop + .modal:has(.newsletter),
+/* Push notification prompts */
+.push-notification-prompt,
+[class*="push-prompt"],
+[id*="push-prompt"] {
+  display: none !important;
+}
