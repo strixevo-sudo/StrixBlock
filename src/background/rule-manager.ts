@@ -1,12 +1,10 @@
 // StrixBlock v2 — declarativeNetRequest lifecycle manager
 
-import type { ParsedNetworkRule } from '../shared/types.js';
 import {
   DNR_MAX_DYNAMIC_RULES,
   DNR_DYNAMIC_START_ID,
   DNR_PRIORITY,
 } from '../shared/constants.js';
-import type { FilterEngine } from './filter-engine.js';
 import { compileToDNR } from './filter-engine.js';
 
 /**
@@ -98,8 +96,6 @@ export async function compileAndApplyCustomRules(
     .filter((r) => r.id >= DNR_DYNAMIC_START_ID + 2000)
     .map((r) => r.id);
 
-  const toAdd = [...nonCustom.slice(0, DNR_MAX_DYNAMIC_RULES - dnrRules.length), ...dnrRules];
-
   await chrome.declarativeNetRequest.updateDynamicRules({
     removeRuleIds: removeIds,
     addRules: dnrRules.slice(0, DNR_MAX_DYNAMIC_RULES - nonCustom.length),
@@ -130,7 +126,7 @@ export async function compileAndApplyWhitelist(domains: string[]): Promise<void>
       {
         id: WHITELIST_START + idx * 2,
         priority: DNR_PRIORITY.WHITELIST_DOMAIN,
-        action: { type: 'allow' as const },
+        action: { type: chrome.declarativeNetRequest.RuleActionType.ALLOW },
         condition: {
           initiatorDomains: [domain],
           resourceTypes: [
@@ -143,7 +139,7 @@ export async function compileAndApplyWhitelist(domains: string[]): Promise<void>
       {
         id: WHITELIST_START + idx * 2 + 1,
         priority: DNR_PRIORITY.WHITELIST_DOMAIN,
-        action: { type: 'allow' as const },
+        action: { type: chrome.declarativeNetRequest.RuleActionType.ALLOW },
         condition: {
           requestDomains: [domain],
           resourceTypes: ['main_frame'] as chrome.declarativeNetRequest.ResourceType[],
@@ -157,5 +153,3 @@ export async function compileAndApplyWhitelist(domains: string[]): Promise<void>
   });
 }
 
-// Re-export for convenience
-export type { FilterEngine };

@@ -67,13 +67,13 @@
     ...rest: [boolean?, string?, string?]
   ): void {
     const urlStr = typeof url === 'string' ? url : url.href;
+    const origCall = _origOpen as (...args: unknown[]) => void;
     for (const pattern of AD_FETCH_PATTERNS) {
       if (urlStr.includes(pattern)) {
-        // Redirect to empty data URL
-        return _origOpen.call(this, method, 'data:text/plain,', ...rest);
+        return origCall.call(this, method, 'data:text/plain,', ...rest);
       }
     }
-    return _origOpen.call(this, method, url, ...rest);
+    return origCall.call(this, method, url, ...rest);
   };
 
   // ─── sendBeacon Block for tracker domains ────────────────────────────────
@@ -323,7 +323,7 @@
 
   try {
     const _origGetChannelData = AudioBuffer.prototype.getChannelData;
-    AudioBuffer.prototype.getChannelData = function (channel: number): Float32Array {
+    AudioBuffer.prototype.getChannelData = function (channel: number): Float32Array<ArrayBuffer> {
       const data = _origGetChannelData.call(this, channel);
       // Add tiny imperceptible noise to defeat audio fingerprinting
       for (let i = 0; i < data.length; i += 100) {
@@ -377,7 +377,7 @@
           }
         }
       }
-      return _origToDataURL.call(this, type, quality);
+      return _origToDataURL.call(this, type, quality as number | undefined);
     };
   } catch { /* ignore */ }
 

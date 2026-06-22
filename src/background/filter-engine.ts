@@ -256,7 +256,9 @@ export function compileToDNR(
     }
 
     if (rule.thirdParty !== undefined) {
-      condition.domainType = rule.thirdParty ? 'thirdParty' : 'firstParty';
+      condition.domainType = rule.thirdParty
+        ? chrome.declarativeNetRequest.DomainType.THIRD_PARTY
+        : chrome.declarativeNetRequest.DomainType.FIRST_PARTY;
     }
 
     if (rule.initiatorDomains && rule.initiatorDomains.length > 0) {
@@ -272,17 +274,17 @@ export function compileToDNR(
     let priority: number;
 
     if (rule.type === 'allow') {
-      action = { type: 'allow' };
+      action = { type: chrome.declarativeNetRequest.RuleActionType.ALLOW };
       priority = DNR_PRIORITY.ALLOW;
     } else if (rule.type === 'redirect') {
       if (!rule.redirectExtensionPath) continue;
       action = {
-        type: 'redirect',
+        type: chrome.declarativeNetRequest.RuleActionType.REDIRECT,
         redirect: { extensionPath: rule.redirectExtensionPath },
       };
       priority = DNR_PRIORITY.REDIRECT;
     } else {
-      action = { type: 'block' };
+      action = { type: chrome.declarativeNetRequest.RuleActionType.BLOCK };
       priority = DNR_PRIORITY.BLOCK;
     }
 

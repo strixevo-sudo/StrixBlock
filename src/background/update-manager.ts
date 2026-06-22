@@ -9,7 +9,6 @@ import {
 } from '../shared/constants.js';
 import * as storage from './storage.js';
 import { parseFilterList, compileToDNR, compileToCSS } from './filter-engine.js';
-import { updateDynamicRules } from './rule-manager.js';
 import { DNR_DYNAMIC_START_ID } from '../shared/constants.js';
 
 // ─── Extension Update Check ───────────────────────────────────────────────────

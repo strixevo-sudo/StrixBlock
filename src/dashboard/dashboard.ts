@@ -7,7 +7,6 @@ import { formatCount, formatRelativeTime } from '../shared/utils.js';
 // ─── State ────────────────────────────────────────────────────────────────────
 
 let currentSettings: Settings | null = null;
-let currentStats: Stats | null = null;
 
 // ─── DOM Helpers ──────────────────────────────────────────────────────────────
 
@@ -347,7 +346,7 @@ function renderAllSettings(): void {
   renderToggleGroup(
     'featuresContainer',
     featureConfigs,
-    (key) => currentSettings!.features[key as keyof typeof currentSettings.features],
+    (key) => currentSettings!.features[key as keyof Settings['features']],
     async (key, val) => {
       if (!currentSettings) return;
       const features = { ...currentSettings.features, [key]: val };
@@ -365,7 +364,7 @@ function renderAllSettings(): void {
   renderToggleGroup(
     'privacyContainer',
     privacyConfigs,
-    (key) => currentSettings!.privacy[key as keyof typeof currentSettings.privacy],
+    (key) => currentSettings!.privacy[key as keyof Settings['privacy']],
     async (key, val) => {
       if (!currentSettings) return;
       const privacy = { ...currentSettings.privacy, [key]: val };
@@ -568,7 +567,6 @@ async function init(): Promise<void> {
   }
 
   if (stats) {
-    currentStats = stats;
     renderOverview(stats);
   }
 }

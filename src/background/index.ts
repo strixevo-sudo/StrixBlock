@@ -1,6 +1,6 @@
 // StrixBlock v2 — Service worker entry point
 
-import type { Message, MessageResponse, TabStats, Settings } from '../shared/types.js';
+import type { Message, MessageResponse, TabStats } from '../shared/types.js';
 import { ALARM_NAMES, STORAGE_KEYS } from '../shared/constants.js';
 import { extractDomain } from '../shared/utils.js';
 
