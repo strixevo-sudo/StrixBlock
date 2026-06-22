@@ -834,5 +834,11 @@
   { "id": 1204, "priority": 1, "action": { "type": "block" }, "condition": { "urlFilter": "||advice-ads.s3.amazonaws.com^",             "resourceTypes": ["script","image","xmlhttprequest","other"] } },
 
   { "id": 1205, "priority": 1, "action": { "type": "block" }, "condition": { "urlFilter": "*/pagead.js",   "resourceTypes": ["script"] } },
-  { "id": 1206, "priority": 1, "action": { "type": "block" }, "condition": { "urlFilter": "*/widget/ads.", "resourceTypes": ["script"] } }
+  { "id": 1206, "priority": 1, "action": { "type": "block" }, "condition": { "urlFilter": "*/widget/ads.", "resourceTypes": ["script"] } },
+
+  { "id": 1207, "priority": 2, "action": { "type": "block" }, "condition": { "urlFilter": "www.youtube.com/pagead/",        "resourceTypes": ["xmlhttprequest","script","sub_frame","other","ping"] } },
+  { "id": 1208, "priority": 2, "action": { "type": "block" }, "condition": { "urlFilter": "youtube.com/api/stats/ads",      "resourceTypes": ["xmlhttprequest","ping","other"] } },
+  { "id": 1209, "priority": 2, "action": { "type": "block" }, "condition": { "urlFilter": "youtube.com/pcs/activeview",     "resourceTypes": ["xmlhttprequest","ping","other"] } },
+  { "id": 1210, "priority": 2, "action": { "type": "block" }, "condition": { "urlFilter": "youtube.com/api/stats/qoe",      "resourceTypes": ["xmlhttprequest","ping","other"] } },
+  { "id": 1211, "priority": 2, "action": { "type": "block" }, "condition": { "urlFilter": "youtube.com/api/stats/watchtime","resourceTypes": ["xmlhttprequest","ping","other"] } }
 ]

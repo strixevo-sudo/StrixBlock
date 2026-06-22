@@ -1,4 +1,4 @@
-const CURRENT_VERSION = '1.3.0';
+const CURRENT_VERSION = '1.4.0';
 const GITHUB_REPO = 'strixevo-sudo/StrixBlock';
 
 function compareVersions(a, b) {
@@ -31,7 +31,7 @@ async function checkForUpdates() {
 }
 
 chrome.runtime.onInstalled.addListener(() => {
-  console.log('[StrixBlock] v1.3.0 installed — 788 rules active.');
+  console.log('[StrixBlock] v1.4.0 installed — 793 rules active.');
   checkForUpdates();
   chrome.alarms.create('updateCheck', { periodInMinutes: 1440 });
 });

@@ -3,6 +3,76 @@
 (function () {
   'use strict';
 
+  // ── ytInitialPlayerResponse hook ─────────────────────────────────────────────
+  // YouTube stores all ad-break config in this global before the player inits.
+  // Stripping it here means the player never knows there are ads to show.
+  let _ytPlayerResponse;
+  try {
+    Object.defineProperty(window, 'ytInitialPlayerResponse', {
+      get() { return _ytPlayerResponse; },
+      set(val) {
+        if (val && typeof val === 'object') {
+          delete val.adBreaks;
+          delete val.adPlacements;
+          delete val.adSlots;
+          delete val.playerAds;
+          if (val.playerConfig) delete val.playerConfig.adTagUrl;
+        }
+        _ytPlayerResponse = val;
+      },
+      configurable: true,
+    });
+  } catch (_) {}
+
+  // ── Fetch/XHR interception for YouTube's ad API paths ────────────────────────
+  const YT_AD_PATHS = [
+    '/pagead/',
+    '/api/stats/ads',
+    '/pcs/activeview',
+    '/api/stats/qoe',
+    '/youtubei/v1/player/ad_break',
+  ];
+
+  function isYtAdUrl(url) {
+    const u = (typeof url === 'string' ? url : (url && url.url) || String(url));
+    return YT_AD_PATHS.some(p => u.includes(p));
+  }
+
+  const origFetch = window.fetch;
+  window.fetch = function (url, ...args) {
+    if (isYtAdUrl(url)) {
+      return Promise.resolve(new Response('{}', {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }));
+    }
+    return origFetch.call(this, url, ...args);
+  };
+
+  const origXHROpen = XMLHttpRequest.prototype.open;
+  const origXHRSend = XMLHttpRequest.prototype.send;
+  XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+    this._strixAdBlock = isYtAdUrl(url);
+    return origXHROpen.call(this, method, url, ...rest);
+  };
+  XMLHttpRequest.prototype.send = function (body) {
+    if (this._strixAdBlock) {
+      setTimeout(() => {
+        try {
+          Object.defineProperty(this, 'readyState', { get: () => 4, configurable: true });
+          Object.defineProperty(this, 'status', { get: () => 200, configurable: true });
+          Object.defineProperty(this, 'responseText', { get: () => '{}', configurable: true });
+          Object.defineProperty(this, 'response', { get: () => '{}', configurable: true });
+        } catch (_) {}
+        this.dispatchEvent(new Event('readystatechange'));
+        this.dispatchEvent(new Event('load'));
+      }, 1);
+      return;
+    }
+    return origXHRSend.call(this, body);
+  };
+
+  // ── google.ima spoof ─────────────────────────────────────────────────────────
   if (!window.google) window.google = {};
 
   const AD_EVENT_TYPES = {
@@ -23,12 +93,10 @@
       removeEventListener: function() {},
       init: function() {},
       start: function() {
-        // Immediately fire sequence: ads "started" then "complete" — no visual ad shown
         const fire = function(type) {
           const fn = listeners[type];
           if (fn) try { fn({ type: type, getAd: function() { return null; } }); } catch (_) {}
         };
-        // Brief pause then immediate resume — bypasses YouTube's timeout detection
         setTimeout(function() {
           fire(AD_EVENT_TYPES.CONTENT_PAUSE_REQUESTED);
           setTimeout(function() {
@@ -63,13 +131,10 @@
       self.addEventListener = function(type, fn) { self._listeners[type] = fn; };
       self.removeEventListener = function() {};
       self.requestAds = function() {
-        // Fire ADS_MANAGER_LOADED after short delay so YouTube's setup code runs
         setTimeout(function() {
           const fn = self._listeners['adsManagerLoaded'];
           if (fn) {
-            try {
-              fn({ getAdsManager: function() { return makeFakeAdsManager(); } });
-            } catch (_) {}
+            try { fn({ getAdsManager: function() { return makeFakeAdsManager(); } }); } catch (_) {}
           }
         }, 100);
       };
@@ -103,7 +168,7 @@
     window.google.ima = imaStub;
   }
 
-  // Spoof adsbygoogle
+  // ── adsbygoogle / googletag spoofs ───────────────────────────────────────────
   try {
     if (!window.adsbygoogle) {
       Object.defineProperty(window, 'adsbygoogle', {
@@ -114,7 +179,6 @@
     }
   } catch (_) {}
 
-  // Spoof googletag (GPT)
   try {
     if (!window.googletag) {
       window.googletag = {
@@ -135,7 +199,7 @@
     }
   } catch (_) {}
 
-  // Proactively stub popular tracker APIs so sites don't error when we block their scripts
+  // ── Tracker API stubs ────────────────────────────────────────────────────────
   try {
     var noop = function() {};
     if (!window.dataLayer) window.dataLayer = [];
@@ -171,10 +235,7 @@
     if (!window.hbspt) window.hbspt = { forms: { create: noop } };
   } catch (_) {}
 
-  // Note: getComputedStyle override removed — it caused adblock tests to falsely
-  // see hidden ad elements as visible. Anti-adblock bypass handled by bait divs instead.
-
-  // Block common tracker beacon methods
+  // ── sendBeacon blocker ───────────────────────────────────────────────────────
   try {
     const origSendBeacon = navigator.sendBeacon.bind(navigator);
     const BEACON_BLOCKLIST = [
@@ -192,18 +253,17 @@
     };
   } catch (_) {}
 
-  // Announce DNT/GPC to reduce tracking on sites that respect it
+  // ── Privacy signals ──────────────────────────────────────────────────────────
   try {
     Object.defineProperty(navigator, 'doNotTrack', { get: () => '1', configurable: true });
     Object.defineProperty(navigator, 'globalPrivacyControl', { get: () => true, configurable: true });
   } catch (_) {}
 
-  // AudioContext fingerprinting protection
+  // ── Fingerprinting protection ────────────────────────────────────────────────
   try {
     const origGetChannelData = AudioBuffer.prototype.getChannelData;
     AudioBuffer.prototype.getChannelData = function (channel) {
       const data = origGetChannelData.call(this, channel);
-      // Add tiny noise only to short buffers used for fingerprinting, not music
       if (data.length < 10000) {
         for (let i = 0; i < data.length; i += 50) {
           data[i] += 1e-7 * (Math.floor(i * 1.1) % 3 - 1);
@@ -213,7 +273,6 @@
     };
   } catch (_) {}
 
-  // WebGL fingerprinting — return consistent but slightly altered vendor/renderer strings
   try {
     const origGetParam = WebGLRenderingContext.prototype.getParameter;
     WebGLRenderingContext.prototype.getParameter = function (param) {
@@ -232,13 +291,11 @@
     };
   } catch (_) {}
 
-  // Spoof canvas fingerprinting (subtle noise without breaking rendering)
   try {
     const origToDataURL = HTMLCanvasElement.prototype.toDataURL;
     const origGetImageData = CanvasRenderingContext2D.prototype.getImageData;
     HTMLCanvasElement.prototype.toDataURL = function (...args) {
       const result = origToDataURL.apply(this, args);
-      // Only add noise if this looks like a fingerprint canvas (small, not user-drawn)
       if (this.width <= 16 && this.height <= 16) {
         return result.slice(0, -5) + 'XXXXX';
       }
@@ -246,7 +303,6 @@
     };
     CanvasRenderingContext2D.prototype.getImageData = function (x, y, w, h) {
       const data = origGetImageData.apply(this, arguments);
-      // Subtle noise on tiny fingerprint canvases
       if (w <= 16 && h <= 16) {
         for (let i = 0; i < data.data.length; i += 100) {
           data.data[i] ^= 1;

@@ -2,6 +2,9 @@
   'use strict';
 
   let lastAction = 0;
+  let adSpeedActive = false;
+  let savedRate = 1;
+  let savedVolume = null;
 
   const SKIP_SELECTORS = [
     '.ytp-skip-ad-button',
@@ -28,22 +31,36 @@
     '[class*="ad-overlay"] [class*="close"]',
   ].join(',');
 
+  function getPlayer() {
+    return document.querySelector('#movie_player') || document.querySelector('.html5-video-player');
+  }
+
+  function getVideo() {
+    const p = getPlayer();
+    if (p) { const v = p.querySelector('video'); if (v) return v; }
+    return document.querySelector('video.html5-main-video') || document.querySelector('video');
+  }
+
+  function isAdShowing() {
+    const player = getPlayer();
+    if (!player) return false;
+    return (
+      player.classList.contains('ad-showing') ||
+      player.classList.contains('ad-interrupting') ||
+      !!document.querySelector('.ytp-ad-player-overlay') ||
+      !!document.querySelector('.ytp-ad-persistent-progress-bar-container') ||
+      !!document.querySelector('.ytp-ad-progress-list')
+    );
+  }
+
   function skipAd() {
     const now = Date.now();
-    if (now - lastAction < 180) return;
+    if (now - lastAction < 100) return;
 
-    const player = document.querySelector('.html5-video-player');
-    const video  = document.querySelector('video.html5-main-video') ||
-                   document.querySelector('video');
+    const video = getVideo();
+    const adShowing = isAdShowing();
 
-    if (!player && !video) return;
-
-    const adShowing = player && (
-      player.classList.contains('ad-showing') ||
-      player.classList.contains('ad-interrupting')
-    );
-
-    // 1. Try clicking any visible skip button
+    // 1. Click visible skip button
     const skipBtn = document.querySelector(SKIP_SELECTORS);
     if (skipBtn && (skipBtn.offsetParent !== null || skipBtn.offsetWidth > 0)) {
       lastAction = now;
@@ -51,7 +68,7 @@
       return;
     }
 
-    // 2. Jump to end to force skip when no button is visible yet
+    // 2. Jump to end (skippable pre-rolls and mid-rolls)
     if (adShowing && video && video.duration && isFinite(video.duration) && video.duration > 0) {
       lastAction = now;
       video.currentTime = video.duration;
@@ -59,26 +76,41 @@
       return;
     }
 
-    // 3. Close overlay ads
+    // 3. Speed through non-skippable bumpers at 16x
+    if (adShowing && video && !video.paused) {
+      if (!adSpeedActive) {
+        savedRate = video.playbackRate || 1;
+        adSpeedActive = true;
+      }
+      video.playbackRate = 16;
+      lastAction = now;
+      return;
+    }
+
+    // Restore playback rate once ad ends
+    if (!adShowing && adSpeedActive) {
+      adSpeedActive = false;
+      if (video) video.playbackRate = savedRate || 1;
+    }
+
+    // 4. Close overlay/banner ads
     const closeBtn = document.querySelector(CLOSE_SELECTORS);
     if (closeBtn && closeBtn.offsetParent !== null) {
       lastAction = now;
       closeBtn.click();
     }
 
-    // 4. Hide ad badges / promoted labels
+    // 5. Hide remaining ad badges
     document.querySelectorAll(
       '.ytp-ad-badge, .ytp-ad-simple-ad-badge, .ytp-ad-timed-pie-countdown-renderer'
     ).forEach(el => { el.style.cssText = 'display:none!important'; });
   }
 
-  // Mute during ad and restore after (backup to jump-to-end)
-  let savedVolume = null;
   function muteGuard() {
-    const player = document.querySelector('.html5-video-player');
-    const video  = document.querySelector('video.html5-main-video') || document.querySelector('video');
+    const player = getPlayer();
+    const video = getVideo();
     if (!player || !video) return;
-    const adShowing = player.classList.contains('ad-showing') || player.classList.contains('ad-interrupting');
+    const adShowing = isAdShowing();
     if (adShowing && !video.muted) {
       savedVolume = video.volume;
       video.muted = true;
@@ -90,8 +122,8 @@
     }
   }
 
-  setInterval(skipAd, 200);
-  setInterval(muteGuard, 300);
+  setInterval(skipAd, 100);
+  setInterval(muteGuard, 200);
 
   const observer = new MutationObserver(() => {
     skipAd();
@@ -113,14 +145,13 @@
     document.addEventListener('DOMContentLoaded', startObserver, { once: true });
   }
 
-  // Auto-resume if paused by enforcement dialog (not by the user)
+  // Remove enforcement/adblock dialog and resume video
   setInterval(function() {
-    const player = document.querySelector('.html5-video-player');
-    const video  = document.querySelector('video.html5-main-video') || document.querySelector('video');
+    const player = getPlayer();
+    const video = getVideo();
     if (!player || !video) return;
-    const adShowing = player.classList.contains('ad-showing') || player.classList.contains('ad-interrupting');
+    const adShowing = isAdShowing();
     if (adShowing || !video.paused) return;
-    // Only resume if an enforcement or adblock dialog is present
     const enforcement = document.querySelector(
       'ytd-enforcement-message-view-model, tp-yt-paper-dialog[id="yt-confirm-dialog"], ytd-popup-container yt-confirm-dialog-renderer'
     );
@@ -129,11 +160,11 @@
       container.remove();
       video.play().catch(() => {});
     }
-  }, 600);
+  }, 500);
 
-  // Handle YouTube SPA navigation
   document.addEventListener('yt-navigate-finish', () => {
     lastAction = 0;
     savedVolume = null;
+    adSpeedActive = false;
   });
 })();

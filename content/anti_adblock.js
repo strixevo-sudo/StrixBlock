@@ -68,6 +68,8 @@
   ];
 
   function removeWalls() {
+    const active = document.activeElement;
+    if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
     // Remove known anti-adblock overlay/modal elements
     document.querySelectorAll(WALL_SELECTORS).forEach(el => {
       if (el && el.offsetParent !== null) el.remove();

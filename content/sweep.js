@@ -100,6 +100,10 @@
   }
 
   function sweepAds() {
+    // Don't sweep while the user is typing — prevents focus theft on search bars
+    const active = document.activeElement;
+    if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
+
     document.querySelectorAll(
       'iframe, ins, div[id], div[class], article[class], section[class], aside, [data-ad-client], [data-ad-slot], [data-taboola-id], [id^="div-gpt-ad"], [id^="google_ads_iframe"]'
     ).forEach(el => {
