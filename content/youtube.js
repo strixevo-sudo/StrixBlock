@@ -143,6 +143,5 @@
   document.addEventListener('yt-navigate-finish', () => {
     lastAction = 0;
     savedVolume = null;
-    adSpeedActive = false;
   });
 })();

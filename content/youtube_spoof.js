@@ -3,27 +3,6 @@
 (function () {
   'use strict';
 
-  // ── ytInitialPlayerResponse hook ─────────────────────────────────────────────
-  // YouTube stores all ad-break config in this global before the player inits.
-  // Stripping it here means the player never knows there are ads to show.
-  let _ytPlayerResponse;
-  try {
-    Object.defineProperty(window, 'ytInitialPlayerResponse', {
-      get() { return _ytPlayerResponse; },
-      set(val) {
-        if (val && typeof val === 'object') {
-          delete val.adBreaks;
-          delete val.adPlacements;
-          delete val.adSlots;
-          delete val.playerAds;
-          if (val.playerConfig) delete val.playerConfig.adTagUrl;
-        }
-        _ytPlayerResponse = val;
-      },
-      configurable: true,
-    });
-  } catch (_) {}
-
   // ── Fetch/XHR interception for YouTube's ad API paths ────────────────────────
   const YT_AD_PATHS = [
     '/pagead/',
