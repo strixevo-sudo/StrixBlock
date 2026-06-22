@@ -104,10 +104,10 @@
 
   function handleYouTubeWall() {
     if (!location.hostname.includes('youtube.com')) return;
-    // YouTube's "You're using an ad blocker" overlay dialog
     const ytDialogs = document.querySelectorAll(
       'ytd-enforcement-message-view-model, ytd-popup-container tp-yt-paper-dialog, #dialog, .yt-confirm-dialog-renderer'
     );
+    let removedDialog = false;
     ytDialogs.forEach(el => {
       const text = el.innerText || '';
       if (
@@ -117,14 +117,17 @@
         text.toLowerCase().includes('allow google to show')
       ) {
         el.remove();
-        // Unpause the video if it was paused by the wall
+        removedDialog = true;
         const video = document.querySelector('video');
         if (video && video.paused) video.play().catch(() => {});
       }
     });
-    // Remove backdrop/overlay that dims the video
-    const backdrop = document.querySelector('tp-yt-iron-overlay-backdrop, .ytd-popup-container tp-yt-iron-overlay-backdrop');
-    if (backdrop) backdrop.remove();
+    // Only remove the backdrop if we actually removed an enforcement dialog
+    // (backdrop is also used by search suggestions — removing it unconditionally breaks search)
+    if (removedDialog) {
+      const backdrop = document.querySelector('tp-yt-iron-overlay-backdrop');
+      if (backdrop) backdrop.remove();
+    }
   }
 
   // ── Spoof the `adsbygoogle` global so sites think ads are loaded ─────────

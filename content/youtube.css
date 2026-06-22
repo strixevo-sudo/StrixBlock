@@ -64,6 +64,6 @@ ytd-hero-promo-renderer,
 
 /* YouTube's anti-adblock enforcement modal */
 ytd-enforcement-message-view-model,
-tp-yt-iron-overlay-backdrop,
 #error-screen:has([class*="adblock"]),
-ytd-popup-container:has(ytd-enforcement-message-view-model) { display: none !important; }
+ytd-popup-container:has(ytd-enforcement-message-view-model),
+ytd-popup-container:has(ytd-enforcement-message-view-model) tp-yt-iron-overlay-backdrop { display: none !important; }
