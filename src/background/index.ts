@@ -13,7 +13,14 @@ import * as storage from './storage.js';
 
 // ─── Initialisation ───────────────────────────────────────────────────────────
 
-async function init(): Promise<void> {
+let _initPromise: Promise<void> | null = null;
+
+function ensureInit(): Promise<void> {
+  if (!_initPromise) _initPromise = _init();
+  return _initPromise;
+}
+
+async function _init(): Promise<void> {
   console.log('[StrixBlock] Initialising service worker…');
 
   try {
@@ -21,15 +28,12 @@ async function init(): Promise<void> {
     statsManager.clearSession();
 
     if (settings.enabled) {
-      // Apply whitelist as DNR allow rules
       await ruleManager.compileAndApplyWhitelist(settings.whitelist);
 
-      // Apply custom rules
       if (settings.customRules.trim()) {
         await ruleManager.compileAndApplyCustomRules(settings.customRules, filterEngine);
       }
 
-      // Schedule update checks
       if (settings.updates.checkExtension || settings.updates.checkFilterLists) {
         updateManager.scheduleUpdates(settings.updates.intervalHours);
       }
@@ -38,24 +42,27 @@ async function init(): Promise<void> {
     console.log('[StrixBlock] Service worker ready.');
   } catch (err) {
     console.error('[StrixBlock] Initialisation error:', err);
+    _initPromise = null; // allow retry on next message
   }
 }
+
+// Run immediately so SW restarts (no onInstalled/onStartup) are covered
+ensureInit();
 
 // ─── Event Listeners ──────────────────────────────────────────────────────────
 
 chrome.runtime.onInstalled.addListener(async (details) => {
   console.log('[StrixBlock] onInstalled:', details.reason);
-  await init();
+  await ensureInit();
 
   if (details.reason === 'install') {
-    // Open dashboard on first install
     chrome.tabs.create({ url: chrome.runtime.getURL('dist/dashboard/dashboard.html') });
   }
 });
 
-chrome.runtime.onStartup.addListener(async () => {
+chrome.runtime.onStartup.addListener(() => {
   console.log('[StrixBlock] onStartup');
-  await init();
+  ensureInit();
 });
 
 // ─── Message Handler ──────────────────────────────────────────────────────────
@@ -66,14 +73,14 @@ chrome.runtime.onMessage.addListener(
     sender: chrome.runtime.MessageSender,
     sendResponse: (response: MessageResponse) => void
   ) => {
-    handleMessage(message, sender)
+    ensureInit()
+      .then(() => handleMessage(message, sender))
       .then(sendResponse)
       .catch((err) => {
         console.error('[StrixBlock] Message error:', err);
         sendResponse({ success: false, error: String(err) });
       });
 
-    // Return true to indicate async response
     return true;
   }
 );
@@ -241,6 +248,7 @@ async function handleMessage(
 // ─── Alarm Handler ────────────────────────────────────────────────────────────
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
+  await ensureInit();
   const settings = settingsManager.get();
 
   if (alarm.name === ALARM_NAMES.UPDATE_CHECK) {
