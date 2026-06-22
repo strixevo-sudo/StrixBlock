@@ -2,8 +2,6 @@
   'use strict';
 
   let lastAction = 0;
-  let adSpeedActive = false;
-  let savedRate = 1;
   let savedVolume = null;
 
   const SKIP_SELECTORS = [
@@ -46,10 +44,7 @@
     if (!player) return false;
     return (
       player.classList.contains('ad-showing') ||
-      player.classList.contains('ad-interrupting') ||
-      !!document.querySelector('.ytp-ad-player-overlay') ||
-      !!document.querySelector('.ytp-ad-persistent-progress-bar-container') ||
-      !!document.querySelector('.ytp-ad-progress-list')
+      player.classList.contains('ad-interrupting')
     );
   }
 
@@ -76,31 +71,14 @@
       return;
     }
 
-    // 3. Speed through non-skippable bumpers at 16x
-    if (adShowing && video && !video.paused) {
-      if (!adSpeedActive) {
-        savedRate = video.playbackRate || 1;
-        adSpeedActive = true;
-      }
-      video.playbackRate = 16;
-      lastAction = now;
-      return;
-    }
-
-    // Restore playback rate once ad ends
-    if (!adShowing && adSpeedActive) {
-      adSpeedActive = false;
-      if (video) video.playbackRate = savedRate || 1;
-    }
-
-    // 4. Close overlay/banner ads
+    // 3. Close overlay/banner ads
     const closeBtn = document.querySelector(CLOSE_SELECTORS);
     if (closeBtn && closeBtn.offsetParent !== null) {
       lastAction = now;
       closeBtn.click();
     }
 
-    // 5. Hide remaining ad badges
+    // 4. Hide ad badges
     document.querySelectorAll(
       '.ytp-ad-badge, .ytp-ad-simple-ad-badge, .ytp-ad-timed-pie-countdown-renderer'
     ).forEach(el => { el.style.cssText = 'display:none!important'; });

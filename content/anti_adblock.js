@@ -1,6 +1,10 @@
 (function () {
   'use strict';
 
+  let inputFocused = false;
+  document.addEventListener('focusin',  e => { if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) inputFocused = true; }, true);
+  document.addEventListener('focusout', e => { if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) inputFocused = false; }, true);
+
   // Selectors used by common anti-adblock walls
   const WALL_SELECTORS = [
     '[class*="adblock-detected"]',
@@ -68,8 +72,7 @@
   ];
 
   function removeWalls() {
-    const active = document.activeElement;
-    if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
+    if (inputFocused) return;
     // Remove known anti-adblock overlay/modal elements
     document.querySelectorAll(WALL_SELECTORS).forEach(el => {
       if (el && el.offsetParent !== null) el.remove();

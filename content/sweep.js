@@ -1,6 +1,10 @@
 (function () {
   'use strict';
 
+  let inputFocused = false;
+  document.addEventListener('focusin',  e => { if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) inputFocused = true; }, true);
+  document.addEventListener('focusout', e => { if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) inputFocused = false; }, true);
+
   const AD_SIZES = new Set([
     '300x250', '728x90', '160x600', '320x50', '468x60',
     '970x250', '970x90', '336x280', '200x200', '250x250',
@@ -100,9 +104,7 @@
   }
 
   function sweepAds() {
-    // Don't sweep while the user is typing — prevents focus theft on search bars
-    const active = document.activeElement;
-    if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
+    if (inputFocused) return;
 
     document.querySelectorAll(
       'iframe, ins, div[id], div[class], article[class], section[class], aside, [data-ad-client], [data-ad-slot], [data-taboola-id], [id^="div-gpt-ad"], [id^="google_ads_iframe"]'
